@@ -1,0 +1,165 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+if player.PlayerGui:FindFirstChild("MM2_.xESP") then
+    return
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MM2_.xESP"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Parent = screenGui
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.Size = UDim2.new(0, 180, 0, 120)
+frame.Position = UDim2.new(0.5, -90, 0.5, -60)
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = frame
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Parent = frame
+statusLabel.BackgroundTransparency = 1
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.Position = UDim2.new(0, 0, 0, 10)
+statusLabel.Text = "Status: Off"
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.TextScaled = true
+statusLabel.Font = Enum.Font.Gotham
+
+local onButton = Instance.new("TextButton")
+onButton.Parent = frame
+onButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+onButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+onButton.Size = UDim2.new(0, 70, 0, 28)
+onButton.Position = UDim2.new(0, 15, 0, 50)
+onButton.Text = "On"
+onButton.TextScaled = true
+onButton.Font = Enum.Font.GothamBold
+
+local onCorner = Instance.new("UICorner")
+onCorner.CornerRadius = UDim.new(0, 6)
+onCorner.Parent = onButton
+
+local offButton = Instance.new("TextButton")
+offButton.Parent = frame
+offButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+offButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+offButton.Size = UDim2.new(0, 70, 0, 28)
+offButton.Position = UDim2.new(0, 95, 0, 50)
+offButton.Text = "Off"
+offButton.TextScaled = true
+offButton.Font = Enum.Font.GothamBold
+
+local offCorner = Instance.new("UICorner")
+offCorner.CornerRadius = UDim.new(0, 6)
+offCorner.Parent = offButton
+
+local destroyButton = Instance.new("TextButton")
+destroyButton.Parent = frame
+destroyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+destroyButton.Size = UDim2.new(0, 150, 0, 25)
+destroyButton.Position = UDim2.new(0, 15, 0, 85)
+destroyButton.Text = "Destroy"
+destroyButton.TextScaled = true
+destroyButton.Font = Enum.Font.Gotham
+
+local destroyCorner = Instance.new("UICorner")
+destroyCorner.CornerRadius = UDim.new(0, 6)
+destroyCorner.Parent = destroyButton
+
+local highlightEnabled = false
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local roles
+local Murder, Sheriff, Hero
+
+function CreateHighlight()
+    if highlightEnabled then
+        for _, v in pairs(Players:GetChildren()) do
+            if v ~= player and v.Character and not v.Character:FindFirstChild("Highlight") then
+                Instance.new("Highlight", v.Character)
+            end
+        end
+    end
+end
+
+function UpdateHighlights()
+    if highlightEnabled then
+        for _, v in pairs(Players:GetChildren()) do
+            if v ~= player and v.Character and v.Character:FindFirstChild("Highlight") then
+                local Highlight = v.Character:FindFirstChild("Highlight")
+                if v.Name == Sheriff and IsAlive(v) then
+                    Highlight.FillColor = Color3.fromRGB(0, 0, 225)
+                elseif HasGun(v) and IsAlive(v) then
+                    Highlight.FillColor = Color3.fromRGB(0, 0, 225)
+                elseif v.Name == Murder and IsAlive(v) then
+                    Highlight.FillColor = Color3.fromRGB(225, 0, 0)
+                elseif v.Name == Hero and IsAlive(v) and not IsAlive(game.Players[Sheriff]) then
+                    Highlight.FillColor = Color3.fromRGB(255, 250, 0)
+                else
+                    Highlight.FillColor = Color3.fromRGB(0, 225, 0)
+                end
+            end
+        end
+    end
+end
+
+function IsAlive(Player)
+    for i, v in pairs(roles) do
+        if Player.Name == i then
+            if not v.Killed and not v.Dead then return true else return false end
+        end
+    end
+    return false
+end
+
+function HasGun(Player)
+    for i, v in pairs(roles) do
+        if Player.Name == i and v.HasGun then return true end
+    end
+    return false
+end
+
+onButton.MouseButton1Click:Connect(function()
+    highlightEnabled = true
+    statusLabel.Text = "Status: On"
+    statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+end)
+
+offButton.MouseButton1Click:Connect(function()
+    highlightEnabled = false
+    statusLabel.Text = "Status: Off"
+    statusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    
+    for _, v in pairs(Players:GetChildren()) do
+        if v.Character and v.Character:FindFirstChild("Highlight") then
+            v.Character:FindFirstChild("Highlight"):Destroy()
+        end
+    end
+end)
+
+destroyButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+RunService.RenderStepped:Connect(function()
+    if highlightEnabled then
+        roles = ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
+        
+        for i, v in pairs(roles) do
+            if v.Role == "Murderer" then Murder = i
+            elseif v.Role == "Sheriff" then Sheriff = i
+            elseif v.Role == "Hero" then Hero = i end
+        end
+        
+        CreateHighlight()
+        UpdateHighlights()
+    end
+end)
