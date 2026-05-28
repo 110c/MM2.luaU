@@ -1,0 +1,284 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+if player.PlayerGui:FindFirstChild("MM2_.xESP") then
+    return
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MM2_.xESP"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Parent = screenGui
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.Size = UDim2.new(0, 160, 0, 145)
+frame.Position = UDim2.new(0.5, -80, 0.5, -72)
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = frame
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Parent = frame
+statusLabel.BackgroundTransparency = 1
+statusLabel.Size = UDim2.new(1, 0, 0, 25)
+statusLabel.Position = UDim2.new(0, 0, 0, 8)
+statusLabel.Text = "Status: Off (0/2)"
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.TextScaled = true
+statusLabel.Font = Enum.Font.Gotham
+
+local highlightOn = Instance.new("TextButton")
+highlightOn.Parent = frame
+highlightOn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+highlightOn.TextColor3 = Color3.fromRGB(0, 0, 0)
+highlightOn.Size = UDim2.new(0, 68, 0, 24)
+highlightOn.Position = UDim2.new(0, 8, 0, 40)
+highlightOn.Text = "ESP On"
+highlightOn.TextScaled = true
+highlightOn.Font = Enum.Font.GothamBold
+
+local hCorner = Instance.new("UICorner")
+hCorner.CornerRadius = UDim.new(0, 6)
+hCorner.Parent = highlightOn
+
+local highlightOff = Instance.new("TextButton")
+highlightOff.Parent = frame
+highlightOff.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+highlightOff.TextColor3 = Color3.fromRGB(0, 0, 0)
+highlightOff.Size = UDim2.new(0, 68, 0, 24)
+highlightOff.Position = UDim2.new(0, 84, 0, 40)
+highlightOff.Text = "ESP Off"
+highlightOff.TextScaled = true
+highlightOff.Font = Enum.Font.GothamBold
+
+local hoCorner = Instance.new("UICorner")
+hoCorner.CornerRadius = UDim.new(0, 6)
+hoCorner.Parent = highlightOff
+
+local nameOn = Instance.new("TextButton")
+nameOn.Parent = frame
+nameOn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+nameOn.TextColor3 = Color3.fromRGB(0, 0, 0)
+nameOn.Size = UDim2.new(0, 68, 0, 24)
+nameOn.Position = UDim2.new(0, 8, 0, 70)
+nameOn.Text = "Name On"
+nameOn.TextScaled = true
+nameOn.Font = Enum.Font.GothamBold
+
+local nCorner = Instance.new("UICorner")
+nCorner.CornerRadius = UDim.new(0, 6)
+nCorner.Parent = nameOn
+
+local nameOff = Instance.new("TextButton")
+nameOff.Parent = frame
+nameOff.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+nameOff.TextColor3 = Color3.fromRGB(0, 0, 0)
+nameOff.Size = UDim2.new(0, 68, 0, 24)
+nameOff.Position = UDim2.new(0, 84, 0, 70)
+nameOff.Text = "Name Off"
+nameOff.TextScaled = true
+nameOff.Font = Enum.Font.GothamBold
+
+local noCorner = Instance.new("UICorner")
+noCorner.CornerRadius = UDim.new(0, 6)
+noCorner.Parent = nameOff
+
+local destroyButton = Instance.new("TextButton")
+destroyButton.Parent = frame
+destroyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+destroyButton.Size = UDim2.new(0, 144, 0, 22)
+destroyButton.Position = UDim2.new(0, 8, 0, 105)
+destroyButton.Text = "Destroy"
+destroyButton.TextScaled = true
+destroyButton.Font = Enum.Font.Gotham
+
+local dCorner = Instance.new("UICorner")
+dCorner.CornerRadius = UDim.new(0, 6)
+dCorner.Parent = destroyButton
+
+local highlightEnabled = false
+local nameESPEnabled = false
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local roles
+local Murder, Sheriff, Hero
+
+function UpdateStatusAndButtons()
+    local active = 0
+    if highlightEnabled then active = active + 1 end
+    if nameESPEnabled then active = active + 1 end
+
+    if active == 0 then
+        statusLabel.Text = "Status: Off (0/2)"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    else
+        statusLabel.Text = "Status: On (" .. active .. "/2)"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+    end
+
+    if highlightEnabled then
+        highlightOn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        highlightOn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        highlightOff.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        highlightOff.TextColor3 = Color3.fromRGB(0, 0, 0)
+    else
+        highlightOn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        highlightOn.TextColor3 = Color3.fromRGB(0, 0, 0)
+        highlightOff.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+        highlightOff.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+
+    if nameESPEnabled then
+        nameOn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        nameOn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameOff.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        nameOff.TextColor3 = Color3.fromRGB(0, 0, 0)
+    else
+        nameOn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        nameOn.TextColor3 = Color3.fromRGB(0, 0, 0)
+        nameOff.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+        nameOff.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+end
+
+function CreateHighlight()
+    if highlightEnabled then
+        for i, v in pairs(Players:GetChildren()) do
+            if v ~= player and v.Character and not v.Character:FindFirstChild("Highlight") then
+                Instance.new("Highlight", v.Character)
+            end
+        end
+    end
+end
+
+function UpdateHighlights()
+    if highlightEnabled then
+        local sheriffAlive = Sheriff and IsAlive(game.Players[Sheriff])
+
+        for _, v in pairs(Players:GetChildren()) do
+            if v ~= player and v.Character and v.Character:FindFirstChild("Highlight") then
+                local Highlight = v.Character:FindFirstChild("Highlight")
+
+                if v.Name == Sheriff and IsAlive(v) then
+                    Highlight.FillColor = Color3.fromRGB(0, 0, 225)      -- Blue = Sheriff
+                elseif HasGun(v) and IsAlive(v) and not sheriffAlive then
+                    Highlight.FillColor = Color3.fromRGB(255, 250, 0)    -- Yellow = Hero (Gun holder when Sheriff dead)
+                elseif HasGun(v) and IsAlive(v) then
+                    Highlight.FillColor = Color3.fromRGB(0, 0, 225)      -- Blue = Gun holder while Sheriff alive
+                elseif v.Name == Murder and IsAlive(v) then
+                    Highlight.FillColor = Color3.fromRGB(225, 0, 0)      -- Red = Murderer
+                elseif v.Name == Hero and IsAlive(v) then
+                    Highlight.FillColor = Color3.fromRGB(255, 250, 0)    -- Yellow = Hero
+                else
+                    Highlight.FillColor = Color3.fromRGB(0, 225, 0)      -- Green = Innocent
+                end
+            end
+        end
+    end
+end
+
+function IsAlive(Player)
+    for i, v in pairs(roles) do
+        if Player.Name == i then
+            if not v.Killed and not v.Dead then return true else return false end
+        end
+    end
+    return false
+end
+
+function HasGun(Player)
+    for i, v in pairs(roles) do
+        if Player.Name == i and v.HasGun then return true end
+    end
+    return false
+end
+
+function CreateNameESP()
+    if nameESPEnabled then
+        for _, v in pairs(Players:GetChildren()) do
+            if v ~= player and v.Character and not v.Character:FindFirstChild("xNameESP") then
+                local bill = Instance.new("BillboardGui")
+                bill.Name = "xNameESP"
+                bill.Adornee = v.Character:FindFirstChild("Head")
+                bill.Size = UDim2.new(0, 150, 0, 40)
+                bill.StudsOffset = Vector3.new(0, 2.8, 0)
+                bill.AlwaysOnTop = true
+                bill.Parent = v.Character
+
+                local text = Instance.new("TextLabel")
+                text.BackgroundTransparency = 1
+                text.Size = UDim2.new(1, 0, 1, 0)
+                text.Text = "@" .. v.Name .. "\n" .. v.DisplayName
+                text.TextColor3 = Color3.fromRGB(255, 255, 255)
+                text.TextScaled = true
+                text.TextSize = 9
+                text.Font = Enum.Font.GothamBold
+                text.Parent = bill
+            end
+        end
+    end
+end
+
+function RemoveNameESP()
+    for _, v in pairs(Players:GetChildren()) do
+        if v.Character then
+            local esp = v.Character:FindFirstChild("xNameESP")
+            if esp then esp:Destroy() end
+        end
+    end
+end
+
+-- Buttons
+highlightOn.MouseButton1Click:Connect(function()
+    highlightEnabled = true
+    UpdateStatusAndButtons()
+end)
+
+highlightOff.MouseButton1Click:Connect(function()
+    highlightEnabled = false
+    UpdateStatusAndButtons()
+end)
+
+nameOn.MouseButton1Click:Connect(function()
+    nameESPEnabled = true
+    UpdateStatusAndButtons()
+end)
+
+nameOff.MouseButton1Click:Connect(function()
+    nameESPEnabled = false
+    RemoveNameESP()
+    UpdateStatusAndButtons()
+end)
+
+destroyButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+UpdateStatusAndButtons()
+
+-- Main Loop
+RunService.RenderStepped:Connect(function()
+    if highlightEnabled or nameESPEnabled then
+        roles = ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
+        
+        for i, v in pairs(roles) do
+            if v.Role == "Murderer" then Murder = i
+            elseif v.Role == "Sheriff" then Sheriff = i
+            elseif v.Role == "Hero" then Hero = i end
+        end
+        
+        if highlightEnabled then
+            CreateHighlight()
+            UpdateHighlights()
+        end
+        if nameESPEnabled then
+            CreateNameESP()
+        end
+    end
+end)
