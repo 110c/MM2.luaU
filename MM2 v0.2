@@ -262,7 +262,7 @@ end)
 
 UpdateStatusAndButtons()
 
--- Main Loop
+- ESP Loop
 RunService.RenderStepped:Connect(function()
     if highlightEnabled or nameESPEnabled then
         roles = ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
